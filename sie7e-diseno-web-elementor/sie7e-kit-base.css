@@ -1,0 +1,126 @@
+/* =========================================================
+   SIE7E – Capa CSS del kit base
+   Dónde va: Elementor → Ajustes del sitio → CSS personalizado.
+   Por cliente: cambiar SOLO los valores de :root según su
+   Design System. El resto no se toca.
+   Uso: añadir las clases u- en Avanzado → Clases CSS del widget
+   o contenedor. Quitar la clase = quitar el efecto.
+   ========================================================= */
+
+/* ---------- 1. Tokens de movimiento (por cliente) ---------- */
+:root {
+  --dur-rapida: 200ms;       /* hovers, pulsar, menús (< 300 ms) */
+  --dur-entrada: 600ms;      /* entradas de contenido */
+  --curva: cubic-bezier(0.22, 1, 0.36, 1); /* ease-out suave, sin rebote */
+  --desplazamiento: 20px;    /* distancia corta de entrada (16–24 px) */
+  --elevar: -4px;            /* subida de tarjetas al pasar el ratón */
+  --zoom-imagen: 1.04;       /* zoom sutil de imágenes */
+  --color-foco: currentColor;/* o el global de Acento del cliente */
+}
+
+/* ---------- 2. Foco visible (accesibilidad, global) ----------
+   Excepción justificada a la regla de no tocar clases .elementor-:
+   quien navega con teclado debe ver dónde está en toda la web. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.elementor-button:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 3px;
+}
+
+/* ---------- 3. Respuesta al pulsar (botones, global) ----------
+   Excepción justificada: todos los botones deben responder igual.
+   Solo anima transform, para no pelear con los colores de hover
+   que se configuran en los globales de Elementor. */
+.elementor-button {
+  transition-property: transform, background-color, color, border-color;
+  transition-duration: var(--dur-rapida);
+  transition-timing-function: var(--curva);
+}
+.elementor-button:active {
+  transform: scale(0.97);
+}
+
+/* ---------- 4. Hovers con clase (solo dispositivos con ratón) ---------- */
+
+/* Tarjeta que sube un poco. Aplicar en el contenedor de la tarjeta. */
+.u-hover-elevar {
+  transition: transform var(--dur-rapida) var(--curva);
+}
+
+/* Imagen con zoom sutil. Aplicar en el widget Imagen. */
+.u-hover-imagen {
+  overflow: hidden;
+}
+.u-hover-imagen img {
+  transition: transform var(--dur-entrada) var(--curva);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .u-hover-elevar:hover {
+    transform: translateY(var(--elevar));
+  }
+  .u-hover-imagen:hover img {
+    transform: scale(var(--zoom-imagen));
+  }
+}
+
+/* ---------- 5. Entrada al hacer scroll (sin JavaScript) ----------
+   Usa animaciones ligadas al scroll del propio navegador. Donde no
+   hay soporte, el elemento simplemente se ve sin animar.
+   No combinar con una Animación de entrada de Elementor en el
+   mismo elemento: usar una u otra. */
+@keyframes u-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--desplazamiento));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .u-reveal {
+    animation: u-reveal both;
+    animation-timing-function: var(--curva);
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+
+/* ---------- 6. WooCommerce: sin entradas en producto, carrito y checkout ---------- */
+.single-product .u-reveal,
+.woocommerce-cart .u-reveal,
+.woocommerce-checkout .u-reveal,
+.woocommerce-account .u-reveal {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- 7. Reducir movimiento (siempre al final) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .u-reveal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .elementor-button:active,
+  .u-hover-elevar:hover,
+  .u-hover-imagen:hover img {
+    transform: none !important;
+  }
+}
